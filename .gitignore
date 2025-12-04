@@ -6,3 +6,8 @@ db.sqlite3
 *.log
 /.vscode
 /.idea
+node_modules/
+dist/
+.DS_Store
+npm-debug.log
+.env.local
