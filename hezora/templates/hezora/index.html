@@ -1,24 +1,51 @@
+
 {% extends 'hezora/base.html' %}
 {% block content %}
-  <h1>Available Books</h1>
-  <div class="grid">
-    {% for book in books %}
-      <div class="card">
-        {% if book.cover %}
-          <img src="{{ book.cover.url }}" alt="{{ book.title }} cover">
-        {% else %}
-          <div class="placeholder">PDF</div>
-        {% endif %}
-        <h3><a href="{% url 'hezora:book_detail' book.pk %}">{{ book.title }}</a></h3>
-        <p class="author">{{ book.author }}</p>
-        <p class="price">KSH {{ book.price }}</p>
-        <form action="{% url 'hezora:add_to_cart' book.pk %}" method="post">
-          {% csrf_token %}
-          <button class="btn">Add to cart</button>
-        </form>
-      </div>
-    {% empty %}
-      <p>No books available yet.</p>
-    {% endfor %}
+  <div class="space-y-8">
+    <div>
+      <h1 class="text-4xl font-bold mb-2 brand-gradient-text">Available Books</h1>
+      <p class="text-muted-foreground">Download or purchase your favorite books</p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for book in books %}
+        <div class="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+          {% if book.cover %}
+            <img src="{{ book.cover.url }}" alt="{{ book.title }} cover" class="w-full h-48 object-cover">
+          {% else %}
+            <div class="w-full h-48 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <span class="text-white font-bold text-lg">📖</span>
+            </div>
+          {% endif %}
+          
+          <div class="p-4 space-y-3">
+            <div>
+              <h3 class="font-bold text-lg line-clamp-2">
+                <a href="{% url 'hezora:book_detail' book.pk %}" class="hover:text-primary transition-colors">
+                  {{ book.title }}
+                </a>
+              </h3>
+              <p class="text-sm text-muted-foreground">{{ book.author }}</p>
+            </div>
+            
+            <p class="text-lg font-semibold text-primary">KSH {{ book.price }}</p>
+            
+            <div class="flex gap-2">
+              <a href="{% url 'hezora:download_book' book.pk %}" class="flex-1 py-2 px-3 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition-opacity text-center font-medium text-sm">
+                Download Free
+              </a>
+              <form action="{% url 'hezora:add_to_cart' book.pk %}" method="post" class="flex-1">
+                {% csrf_token %}
+                <button type="submit" class="w-full py-2 px-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium text-sm">
+                  Add to Cart
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="col-span-full text-center text-muted-foreground py-8">No books available yet.</p>
+      {% endfor %}
+    </div>
   </div>
 {% endblock %}

@@ -3,7 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.conf import settings
 from django.core.mail import send_mail
-from django.views.decorators.http import require_http_methods
+from django.http import FileResponse
+import os
 
 from .models import Book, Order, OrderItem
 from .forms import CheckoutForm
@@ -22,6 +23,24 @@ def index(request):
 def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
     return render(request, "hezora/book_detail.html", {"book": book, "cart_count": _cart_count(request)})
+
+
+def download_book(request, pk):
+    """Download book PDF directly"""
+    book = get_object_or_404(Book, pk=pk)
+    
+    if book.pdf:
+        # Get the file path
+        file_path = book.pdf.path
+        
+        if os.path.exists(file_path):
+            # Return the file as download
+            response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{book.title}.pdf"'
+            return response
+    
+    # If file doesn't exist, redirect back
+    return redirect("hezora:book_detail", pk=pk)
 
 
 def add_to_cart(request, pk):
@@ -56,7 +75,7 @@ def checkout(request):
         form = CheckoutForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
-            order.paid = False
+            order.paid = True  # Mark as paid immediately (no payment processing)
             order.save()
             total = 0
             for book_id, qty in cart.items():
@@ -64,25 +83,18 @@ def checkout(request):
                 OrderItem.objects.create(order=order, book=book, quantity=qty)
                 total += book.price * qty
             request.session["cart"] = {}
+            
+            # Send receipt email
+            subject = f"Thank you for your order! Order {order.id}"
+            lines = [f"Thank you for your purchase!", f"Order ID: {order.id}", "Items:"]
+            for item in order.items.all():
+                lines.append(f"- {item.book.title} x {item.quantity} — KSH {item.total_price()}")
+            lines.append(f"Total: KSH {total}")
+            message = "\n".join(lines)
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [order.email], fail_silently=True)
+            
             return render(request, "hezora/order_summary.html", {"order": order, "total": total, "cart_count": 0})
     else:
         form = CheckoutForm()
 
     return render(request, "hezora/checkout.html", {"form": form, "cart_count": _cart_count(request)})
-
-
-@require_http_methods(["POST"])
-def simulate_payment(request, order_id):
-    order = get_object_or_404(Order, pk=order_id)
-    order.paid = True
-    order.save()
-
-    subject = f"Payment receipt for Order {order.id}"
-    lines = [f"Thank you for your purchase!", f"Order ID: {order.id}", "Items:"]
-    for item in order.items.all():
-        lines.append(f"- {item.book.title} x {item.quantity} — {item.total_price()}")
-    lines.append(f"Total: {order.total()}")
-    message = "\n".join(lines)
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [order.email], fail_silently=True)
-
-    return render(request, "hezora/order_summary.html", {"order": order, "total": order.total(), "cart_count": _cart_count(request)})
