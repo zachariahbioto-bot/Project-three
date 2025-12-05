@@ -1,22 +1,61 @@
 {% extends 'hezora/base.html' %}
+{% block page_title %}Shopping Cart{% endblock %}
+
 {% block content %}
-  <h1>Your Cart</h1>
-  {% if items %}
-    <table class="cart-table">
-      <thead><tr><th>Book</th><th>Qty</th><th>Line</th></tr></thead>
-      <tbody>
-        {% for it in items %}
-          <tr>
-            <td>{{ it.book.title }}</td>
-            <td>{{ it.quantity }}</td>
-            <td>KSH {{ it.line_total }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <p class="total">Total: KSH {{ total }}</p>
-    <a class="btn" href="{% url 'hezora:checkout' %}">Checkout</a>
-  {% else %}
-    <p>Your cart is empty.</p>
-  {% endif %}
+<div class="max-w-4xl animate-fade-in">
+    {% if items %}
+        <div class="space-y-6">
+            {% for item in items %}
+                <div class="flex gap-6 bg-[#efece6] p-6 rounded-xl border border-[#e6e2da] hover:shadow-lg transition-shadow">
+                    <!-- Book Cover -->
+                    {% if item.book.cover %}
+                        <img src="{{ item.book.cover.url }}" alt="{{ item.book.title }}" class="w-20 h-28 object-cover rounded shadow">
+                    {% else %}
+                        <div class="w-20 h-28 bg-gradient-to-br from-[#c28e5e] to-[#3d3328] rounded shadow flex items-center justify-center">
+                            <span class="text-white text-2xl">📖</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Item Details -->
+                    <div class="flex-1">
+                        <h3 class="font-serif font-bold text-lg text-[#3d3328]">{{ item.book.title }}</h3>
+                        <p class="text-sm text-[#8c8479] mb-3">{{ item.book.author }}</p>
+                        
+                        <div class="flex items-center gap-4">
+                            <span class="text-[#c28e5e] font-bold">KSH {{ item.book.price }}</span>
+                            <div class="text-sm text-[#8c8479]">
+                                Qty: <span class="font-bold text-[#3d3328]">{{ item.quantity }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="text-right">
+                        <p class="text-sm text-[#8c8479]">Line Total</p>
+                        <p class="text-2xl font-bold text-[#c28e5e]">KSH {{ item.line_total }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Total Section -->
+            <div class="bg-[#c28e5e] text-white p-8 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-lg">Subtotal</span>
+                    <span class="text-2xl font-bold">KSH {{ total }}</span>
+                </div>
+                <a href="{% url 'hezora:checkout' %}" class="block w-full py-3 px-6 bg-[#3d3328] text-white rounded-lg hover:bg-[#2a231b] transition-colors text-center font-bold shadow-lg">
+                    Proceed to Checkout →
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center h-64 text-center opacity-50 animate-fade-in">
+            <i data-lucide="shopping-bag" class="w-12 h-12 mb-4 text-[#8c8479]"></i>
+            <p class="text-[#8c8479] text-lg mb-4">Your cart is empty</p>
+            <a href="{% url 'hezora:index' %}" class="px-6 py-2 bg-[#c28e5e] text-white rounded-lg hover:bg-[#b87a4a] transition-colors">
+                Continue Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

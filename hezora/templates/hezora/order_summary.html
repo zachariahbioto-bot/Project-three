@@ -1,56 +1,62 @@
 {% extends 'hezora/base.html' %}
+{% block page_title %}Order Confirmed{% endblock %}
+
 {% block content %}
-  <div class="max-w-2xl">
-    <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-      <h1 class="text-2xl font-bold text-green-900 mb-2">✓ Order Confirmed!</h1>
-      <p class="text-green-700">Thank you for your purchase. Download links have been sent to your email.</p>
-    </div>
-    
-    <div class="bg-card border border-border rounded-lg p-6 space-y-4">
-      <div>
-        <p class="text-sm text-muted-foreground">Order ID</p>
-        <p class="text-lg font-semibold">{{ order.id }}</p>
-      </div>
-      
-      <div class="grid md:grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm text-muted-foreground">Email</p>
-          <p class="font-semibold">{{ order.email }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-muted-foreground">Phone</p>
-          <p class="font-semibold">{{ order.phone }}</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="mt-8">
-      <h3 class="text-xl font-bold mb-4">Books in Your Order</h3>
-      <div class="space-y-2">
-        {% for item in order.items.all %}
-          <div class="flex justify-between items-center bg-secondary p-4 rounded-lg">
+<div class="max-w-3xl animate-fade-in">
+    <!-- Success Message -->
+    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-8 mb-8">
+        <div class="flex gap-4 items-start">
+            <i data-lucide="check-circle" class="w-8 h-8 text-green-600 flex-shrink-0 mt-1"></i>
             <div>
-              <p class="font-semibold">{{ item.book.title }}</p>
-              <p class="text-sm text-muted-foreground">Qty: {{ item.quantity }}</p>
+                <h1 class="text-3xl font-serif font-bold text-green-900 mb-2">Order Confirmed! ✓</h1>
+                <p class="text-green-700">Download links have been sent to your email. You can also download from this page.</p>
             </div>
-            <div class="text-right">
-              <p class="font-semibold">KSH {{ item.total_price }}</p>
-              <a href="{% url 'hezora:download_book' item.book.pk %}" class="text-primary hover:underline text-sm">
-                Download →
-              </a>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
+        </div>
     </div>
-    
-    <div class="mt-8 bg-primary text-primary-foreground p-6 rounded-lg">
-      <p class="text-sm mb-2">Total</p>
-      <p class="text-3xl font-bold">KSH {{ total }}</p>
+
+    <!-- Order Details -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-[#efece6] p-6 rounded-xl border border-[#e6e2da]">
+            <p class="text-sm text-[#8c8479] uppercase tracking-wider">Order Number</p>
+            <p class="text-3xl font-bold text-[#3d3328] font-serif">#{{ order.id }}</p>
+        </div>
+        
+        <div class="bg-[#efece6] p-6 rounded-xl border border-[#e6e2da]">
+            <p class="text-sm text-[#8c8479] uppercase tracking-wider">Email</p>
+            <p class="text-xl font-semibold text-[#3d3328]">{{ order.email }}</p>
+        </div>
     </div>
-    
-    <a href="{% url 'hezora:index' %}" class="block mt-8 py-3 px-4 bg-secondary text-foreground rounded-lg hover:bg-border transition-colors text-center font-semibold">
-      Continue Shopping
+
+    <!-- Books Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-serif font-bold text-[#3d3328] mb-4">Your Books</h2>
+        <div class="space-y-3">
+            {% for item in order.items.all %}
+                <div class="flex justify-between items-center bg-[#efece6] p-4 rounded-lg border border-[#e6e2da] hover:shadow-md transition-shadow">
+                    <div>
+                        <p class="font-bold text-[#3d3328]">{{ item.book.title }}</p>
+                        <p class="text-sm text-[#8c8479]">Qty: {{ item.quantity }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-[#c28e5e]">KSH {{ item.total_price }}</p>
+                        <a href="{% url 'hezora:download_book' item.book.pk %}" class="text-xs text-[#c28e5e] hover:underline font-semibold">
+                            Download →
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Total -->
+    <div class="bg-gradient-to-r from-[#c28e5e] to-[#b87a4a] text-white p-8 rounded-xl shadow-lg mb-8">
+        <p class="text-sm uppercase tracking-wider opacity-90 mb-2">Order Total</p>
+        <p class="text-4xl font-bold">KSH {{ total }}</p>
+    </div>
+
+    <!-- Continue Shopping -->
+    <a href="{% url 'hezora:index' %}" class="block py-3 px-6 bg-[#3d3328] text-white rounded-lg hover:bg-[#2a231b] transition-colors text-center font-bold shadow-lg">
+        Continue Shopping
     </a>
-  </div>
+</div>
 {% endblock %}
